@@ -1,5 +1,6 @@
 package com.example.FinTech.Wallet.entity;
 
+import com.example.FinTech.Wallet.enums.CurrencyType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,10 +13,13 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false,unique = true)
     private String userId;
+    @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal balance;
-    private String currency;
+    @Enumerated(EnumType.STRING)
+    private CurrencyType currencyType;
 
     @Version
-    private Integer version; // Critical for Fintech apps!
+    private Integer version;
 }

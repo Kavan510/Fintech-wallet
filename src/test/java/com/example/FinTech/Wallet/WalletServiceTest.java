@@ -1,12 +1,14 @@
 package com.example.FinTech.Wallet;
 
 import com.example.FinTech.Wallet.entity.Wallet;
+import com.example.FinTech.Wallet.enums.CurrencyType;
 import com.example.FinTech.Wallet.repository.WalletRepository;
 import com.example.FinTech.Wallet.service.WalletService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 
@@ -14,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Transactional // Rolls back changes after test so your DB stays clean
 public class WalletServiceTest {
 
@@ -47,14 +50,17 @@ public class WalletServiceTest {
     @Test
     void testInsufficientFundsThrowsException() {
         Wallet w1 = new Wallet();
+        w1.setUserId("user1");
         w1.setBalance(new BigDecimal("10.00"));
+        w1.setCurrencyType(CurrencyType.valueOf("USD"));
         walletRepository.save(w1);
 
         Wallet w2 = new Wallet();
+        w2.setUserId("user2");
         w2.setBalance(new BigDecimal("50.00"));
+        w2.setCurrencyType(CurrencyType.valueOf("USD"));
         walletRepository.save(w2);
 
-        // Act & Assert: Expecting an exception
         assertThrows(RuntimeException.class, () -> {
             walletService.transferMoney(w1.getId(), w2.getId(), new BigDecimal("100.00"));
         });
