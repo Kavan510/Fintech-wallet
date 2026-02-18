@@ -1,8 +1,8 @@
 package com.example.FinTech.Wallet.entity;
 
+import com.example.FinTech.Wallet.enums.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
