@@ -14,6 +14,7 @@ public class WalletService {
     @Autowired
     private WalletRepository walletRepository;
 
+
     @Transactional
     public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
         if(amount==null || amount.compareTo(BigDecimal.ZERO)<=0) {
@@ -38,6 +39,8 @@ public class WalletService {
         // Debit & Credit
         sender.setBalance(sender.getBalance().subtract(amount));
         receiver.setBalance(receiver.getBalance().add(amount));
+
+
 
     }
 }
