@@ -40,7 +40,7 @@ public class WalletServiceTest {
         walletRepository.save(w2);
 
         // 2. Act: Transfer $30
-        walletService.transferMoney(w1.getId(), w2.getId(), new BigDecimal("30.00"));
+        walletService.transferMoney(w1.getId(), w2.getId(), new BigDecimal("30.00"),"svskdj");
 
         // 3. Assert: Check final balances
         assertEquals(0, new BigDecimal("70.00").compareTo(walletRepository.findById(w1.getId()).get().getBalance()));
@@ -62,7 +62,7 @@ public class WalletServiceTest {
         walletRepository.save(w2);
 
         assertThrows(RuntimeException.class, () -> {
-            walletService.transferMoney(w1.getId(), w2.getId(), new BigDecimal("100.00"));
+            walletService.transferMoney(w1.getId(), w2.getId(), new BigDecimal("100.00"),"dsvkjs");
         });
     }
 }
