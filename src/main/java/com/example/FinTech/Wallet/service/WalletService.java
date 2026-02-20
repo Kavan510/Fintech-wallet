@@ -2,16 +2,19 @@ package com.example.FinTech.Wallet.service;
 
 import com.example.FinTech.Wallet.entity.Wallet;
 import com.example.FinTech.Wallet.entity.WalletTransaction;
+import com.example.FinTech.Wallet.enums.CurrencyType;
 import com.example.FinTech.Wallet.enums.TransactionStatus;
 import com.example.FinTech.Wallet.exception.InsufficientFundsException;
 import com.example.FinTech.Wallet.repository.TransactionRepository;
 import com.example.FinTech.Wallet.repository.WalletRepository;
 import jakarta.transaction.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -69,5 +72,30 @@ public class WalletService {
         txn.setTimestamp(LocalDateTime.now());
 
         return transactionRepository.save(txn);
+    }
+
+
+    @Transactional
+    public Wallet createWallet(String userId, String currency, BigDecimal initialBalance) {
+        walletRepository.findByUserId(userId).ifPresent(w -> {
+            throw new RuntimeException("Wallet already exists for user: " + userId);
+        });
+
+        Wallet wallet = new Wallet();
+        wallet.setUserId(userId);
+        wallet.setCurrencyType(CurrencyType.valueOf(currency));
+        wallet.setBalance(initialBalance != null ? initialBalance : BigDecimal.ZERO);
+
+        Wallet savedWallet = walletRepository.save(wallet);
+
+        WalletTransaction initialTxn = new WalletTransaction();
+        initialTxn.setToWalletId(savedWallet.getId());
+        initialTxn.setAmount(wallet.getBalance());
+        initialTxn.setStatus(TransactionStatus.SUCCESS);
+        initialTxn.setDescription("Initial Account Opening");
+        initialTxn.setIdempotencyKey("INIT-" + userId + "-" + System.currentTimeMillis());
+        transactionRepository.save(initialTxn);
+
+        return savedWallet;
     }
 }

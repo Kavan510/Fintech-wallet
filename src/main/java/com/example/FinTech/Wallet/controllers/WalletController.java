@@ -1,6 +1,7 @@
 package com.example.FinTech.Wallet.controllers;
 
 
+import com.example.FinTech.Wallet.entity.Wallet;
 import com.example.FinTech.Wallet.entity.WalletTransaction;
 import com.example.FinTech.Wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,4 +26,11 @@ public class WalletController {
 
         return ResponseEntity.ok(walletService.transferMoney(from, to, amount, key));
     }
+    @PostMapping("/create")
+    public ResponseEntity<Wallet> create(@RequestParam String userId,
+                                         @RequestParam(required = false) String currency,
+                                         @RequestParam(required = false) BigDecimal initialBalance) {
+        return ResponseEntity.ok(walletService.createWallet(userId, currency, initialBalance));
+    }
+
 }

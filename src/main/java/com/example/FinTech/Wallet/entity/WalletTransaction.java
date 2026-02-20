@@ -27,5 +27,6 @@ public class WalletTransaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status; // SUCCESS, FAILED, PENDING
 
+    private String description;
     private LocalDateTime timestamp;
 }
