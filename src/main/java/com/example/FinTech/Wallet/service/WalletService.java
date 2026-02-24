@@ -1,15 +1,18 @@
 package com.example.FinTech.Wallet.service;
 
+import com.example.FinTech.Wallet.entity.User;
 import com.example.FinTech.Wallet.entity.Wallet;
 import com.example.FinTech.Wallet.entity.WalletTransaction;
 import com.example.FinTech.Wallet.enums.CurrencyType;
 import com.example.FinTech.Wallet.enums.TransactionStatus;
 import com.example.FinTech.Wallet.exception.InsufficientFundsException;
 import com.example.FinTech.Wallet.repository.TransactionRepository;
+import com.example.FinTech.Wallet.repository.UserRepository;
 import com.example.FinTech.Wallet.repository.WalletRepository;
 import jakarta.transaction.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,8 @@ public class WalletService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private UserRepository userRepository;
 
 
     @Transactional
@@ -76,26 +81,21 @@ public class WalletService {
 
 
     @Transactional
-    public Wallet createWallet(String userId, String currency, BigDecimal initialBalance) {
-        walletRepository.findByUserId(userId).ifPresent(w -> {
-            throw new RuntimeException("Wallet already exists for user: " + userId);
-        });
+    @PreAuthorize("hasRole('ADMIN')")
+    public Wallet createWalletForUser(String username, BigDecimal initialBalance) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (walletRepository.existsByUser(user)) {
+            throw new RuntimeException("User already has a wallet");
+        }
 
         Wallet wallet = new Wallet();
-        wallet.setUserId(userId);
-        wallet.setCurrencyType(CurrencyType.valueOf(currency));
-        wallet.setBalance(initialBalance != null ? initialBalance : BigDecimal.ZERO);
+        wallet.setUser(user);
+        wallet.setBalance(initialBalance);
+        wallet.setCurrencyType(CurrencyType.valueOf("USD"));
+//                .orElseThrow(()->new RuntimeException(""))
 
-        Wallet savedWallet = walletRepository.save(wallet);
-
-        WalletTransaction initialTxn = new WalletTransaction();
-        initialTxn.setToWalletId(savedWallet.getId());
-        initialTxn.setAmount(wallet.getBalance());
-        initialTxn.setStatus(TransactionStatus.SUCCESS);
-        initialTxn.setDescription("Initial Account Opening");
-        initialTxn.setIdempotencyKey("INIT-" + userId + "-" + System.currentTimeMillis());
-        transactionRepository.save(initialTxn);
-
-        return savedWallet;
+        return walletRepository.save(wallet);
     }
 }

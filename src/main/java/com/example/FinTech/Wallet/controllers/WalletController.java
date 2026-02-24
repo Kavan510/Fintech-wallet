@@ -5,47 +5,47 @@ import com.example.FinTech.Wallet.entity.Wallet;
 import com.example.FinTech.Wallet.entity.WalletTransaction;
 import com.example.FinTech.Wallet.repository.WalletRepository;
 import com.example.FinTech.Wallet.service.WalletService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-
 @RestController
 @RequestMapping("/api/v1/wallets")
+@RequiredArgsConstructor
 public class WalletController {
 
-    @Autowired
-    private WalletService walletService;
-
-
-    @Autowired
-    private WalletRepository walletRepository;
-    @PostMapping("/transfer")
-    public ResponseEntity<WalletTransaction> transfer(
-            @RequestParam Long from,
-            @RequestParam Long to,
-            @RequestParam BigDecimal amount,
-            @RequestHeader("X-Idempotency-Key") String key, Authentication authentication) {
-        String loggedInUserId = authentication.getName();
-
-        Wallet senderWallet= walletRepository.findById(from)
-                .orElseThrow(() -> new RuntimeException("Sender wallet not found"));
-        if (!senderWallet.getUserId().equals(loggedInUserId)) {
-            throw new RuntimeException("You are not allowed to transfer from this wallet");
-        }
-
-        return ResponseEntity.ok(walletService.transferMoney(from, to, amount, key));
-    }
-
-
+    private final WalletService walletService;
+    private final WalletRepository walletRepository;
 
     @PostMapping("/create")
-    public ResponseEntity<Wallet> create(@RequestParam String userId,
-                                         @RequestParam(required = false) String currency,
-                                         @RequestParam(required = false) BigDecimal initialBalance) {
-        return ResponseEntity.ok(walletService.createWallet(userId, currency, initialBalance));
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Wallet> createWallet(@RequestParam String username, @RequestParam BigDecimal balance) {
+        return ResponseEntity.ok(walletService.createWalletForUser(username, balance));
     }
 
+    @PostMapping("/transfer")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<WalletTransaction> transfer(
+            @RequestParam Long fromId,
+            @RequestParam Long toId,
+            @RequestParam BigDecimal amount,
+            @RequestHeader("X-Idempotency-Key") String key,
+            Authentication authentication) {
+
+        // 🛡️ SECURITY DEPTH: Resource Ownership Validation
+        String loggedInUsername = authentication.getName();
+        Wallet senderWallet = walletRepository.findById(fromId)
+                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+        if (!senderWallet.getUser().getUsername().equals(loggedInUsername)) {
+            throw new AccessDeniedException("Ownership check failed: This is not your wallet!");
+        }
+
+        return ResponseEntity.ok(walletService.transferMoney(fromId, toId, amount, key));
+    }
 }

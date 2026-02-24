@@ -13,8 +13,10 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false,unique = true)
-    private String userId;
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user; // Linked to the User entity
+
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal balance;
     @Enumerated(EnumType.STRING)
