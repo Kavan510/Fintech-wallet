@@ -3,7 +3,8 @@ package com.example.FinTech.Wallet.entity;
 import com.example.FinTech.Wallet.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
+
 
 @Entity
 @Table(name = "users")
@@ -17,7 +18,7 @@ public class User {
     private String username;
 
     @Column(nullable = false)
-    private String password; // Will be BCrypt encoded
+    private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;

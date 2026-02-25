@@ -81,7 +81,7 @@ public class WalletService {
 
 
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public Wallet createWalletForUser(String username, BigDecimal initialBalance) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));

@@ -25,11 +25,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll() // Login/Register are public
-                        .requestMatchers("/api/v1/wallets/create").hasRole("ADMIN") // Only Admins
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
+
+//                .csrf(csrf -> csrf.disable())
+//                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/").permitAll()
+//                        .requestMatchers("/api/v1/auth/**").permitAll()
+//                        .requestMatchers("/api/v1/wallets/create").hasRole("ADMIN")
+//                        .anyRequest().authenticated()
+
                 );
 
         // Add JWT Filter here once created

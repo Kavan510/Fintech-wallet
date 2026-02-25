@@ -23,13 +23,13 @@ public class WalletController {
     private final WalletRepository walletRepository;
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Wallet> createWallet(@RequestParam String username, @RequestParam BigDecimal balance) {
         return ResponseEntity.ok(walletService.createWalletForUser(username, balance));
     }
 
     @PostMapping("/transfer")
-    @PreAuthorize("hasRole('USER')")
+//    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<WalletTransaction> transfer(
             @RequestParam Long fromId,
             @RequestParam Long toId,
