@@ -13,13 +13,13 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final Key SECRET_KEY = Keys.hmacShaKeyFor(
+    private final  Key SECRET_KEY = Keys.hmacShaKeyFor(
             "THIS_IS_A_SECRET_KEY_FOR_JWT_GENERATION_123456".getBytes()
     );
 
-    private final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 hour
+    private final long EXPIRATION_TIME = 1000 * 60 * 60;
 
-    public String generateToken(String username, String role) {
+    public  String generateToken(String username, String role) {
 
         return Jwts.builder()
                 .setSubject(username)

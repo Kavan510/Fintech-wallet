@@ -12,6 +12,7 @@ import com.example.FinTech.Wallet.repository.WalletRepository;
 import jakarta.transaction.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +38,14 @@ public class WalletService {
     public WalletTransaction transferMoney(Long fromId,
                                            Long toId,
                                            BigDecimal amount,
-                                           String idempotencyKey) {
+                                           String idempotencyKey,String loggedInUser) {
+
+        Wallet senderWallet = walletRepository.findById(fromId)
+                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+        if (!senderWallet.getUser().getUsername().equals(loggedInUser)) {
+            throw new AccessDeniedException("Ownership check failed: This is not your wallet!");
+        }
 
         WalletTransaction existing = transactionRepository
                 .findByIdempotencyKey(idempotencyKey)
@@ -55,17 +63,14 @@ public class WalletService {
             throw new IllegalArgumentException("Cannot transfer to same wallet");
         }
 
-        Wallet sender = walletRepository.findById(fromId)
-                .orElseThrow(() -> new RuntimeException("Sender not found"));
-
         Wallet receiver = walletRepository.findById(toId)
                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
-        if (sender.getBalance().compareTo(amount) < 0) {
+        if (senderWallet.getBalance().compareTo(amount) < 0) {
             throw new InsufficientFundsException("Insufficient funds");
         }
 
-        sender.setBalance(sender.getBalance().subtract(amount));
+        senderWallet.setBalance(senderWallet.getBalance().subtract(amount));
         receiver.setBalance(receiver.getBalance().add(amount));
 
         WalletTransaction txn = new WalletTransaction();

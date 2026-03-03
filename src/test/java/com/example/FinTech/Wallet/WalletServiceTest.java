@@ -67,7 +67,8 @@ public class WalletServiceTest {
                 w1.getId(),
                 w2.getId(),
                 new BigDecimal("30.00"),
-                "test-key-1"
+                "test-key-1",
+                "user1"
         );
 
         // 🔹 Assert
@@ -116,7 +117,8 @@ public class WalletServiceTest {
                     w1.getId(),
                     w2.getId(),
                     new BigDecimal("100.00"),
-                    "test-key-2"
+                    "test-key-2",
+                    "user2"
             );
         });
     }

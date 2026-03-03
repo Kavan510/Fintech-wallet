@@ -38,13 +38,8 @@ public class WalletController {
             Authentication authentication) {
 
         String loggedInUsername = authentication.getName();
-        Wallet senderWallet = walletRepository.findById(fromId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
 
-        if (!senderWallet.getUser().getUsername().equals(loggedInUsername)) {
-            throw new AccessDeniedException("Ownership check failed: This is not your wallet!");
-        }
 
-        return ResponseEntity.ok(walletService.transferMoney(fromId, toId, amount, key));
+        return ResponseEntity.ok(walletService.transferMoney(fromId, toId, amount, key,loggedInUsername));
     }
 }

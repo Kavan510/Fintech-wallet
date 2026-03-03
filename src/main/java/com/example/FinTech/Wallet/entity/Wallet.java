@@ -15,7 +15,7 @@ public class Wallet {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user; // Linked to the User entity
+    private User user;
 
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal balance;
