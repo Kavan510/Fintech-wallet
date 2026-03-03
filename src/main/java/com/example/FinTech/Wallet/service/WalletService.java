@@ -9,18 +9,14 @@ import com.example.FinTech.Wallet.exception.InsufficientFundsException;
 import com.example.FinTech.Wallet.repository.TransactionRepository;
 import com.example.FinTech.Wallet.repository.UserRepository;
 import com.example.FinTech.Wallet.repository.WalletRepository;
-import jakarta.transaction.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 public class WalletService {
@@ -43,10 +39,12 @@ public class WalletService {
         Wallet senderWallet = walletRepository.findById(fromId)
                 .orElseThrow(() -> new RuntimeException("Wallet not found"));
 
-        if (!senderWallet.getUser().getUsername().equals(loggedInUser)) {
+        User loggedIn = userRepository.findByUsername(loggedInUser)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!senderWallet.getUserId().equals(loggedIn.getId())) {
             throw new AccessDeniedException("Ownership check failed: This is not your wallet!");
         }
-
         WalletTransaction existing = transactionRepository
                 .findByIdempotencyKey(idempotencyKey)
                 .orElse(null);
@@ -91,12 +89,12 @@ public class WalletService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (walletRepository.existsByUser(user)) {
+        if (walletRepository.existsByUserId(user.getId())) {
             throw new RuntimeException("User already has a wallet");
         }
 
         Wallet wallet = new Wallet();
-        wallet.setUser(user);
+        wallet.setUserId(user.getId());
         wallet.setBalance(initialBalance);
         wallet.setCurrencyType(CurrencyType.valueOf("USD"));
 //                .orElseThrow(()->new RuntimeException(""))

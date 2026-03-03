@@ -51,13 +51,13 @@ public class WalletServiceTest {
 
         // 🔹 Create Wallets linked to users
         Wallet w1 = new Wallet();
-        w1.setUser(user1);
+        w1.setUserId(user1.getId());
         w1.setBalance(new BigDecimal("100.00"));
         w1.setCurrencyType(CurrencyType.USD);
         walletRepository.save(w1);
 
         Wallet w2 = new Wallet();
-        w2.setUser(user2);
+        w2.setUserId(user2.getId());
         w2.setBalance(new BigDecimal("50.00"));
         w2.setCurrencyType(CurrencyType.USD);
         walletRepository.save(w2);
@@ -101,13 +101,13 @@ public class WalletServiceTest {
         userRepository.save(user2);
 
         Wallet w1 = new Wallet();
-        w1.setUser(user1);
+        w1.setUserId(user1.getId());
         w1.setBalance(new BigDecimal("10.00"));
         w1.setCurrencyType(CurrencyType.USD);
         walletRepository.save(w1);
 
         Wallet w2 = new Wallet();
-        w2.setUser(user2);
+        w2.setUserId(user2.getId());
         w2.setBalance(new BigDecimal("50.00"));
         w2.setCurrencyType(CurrencyType.USD);
         walletRepository.save(w2);
