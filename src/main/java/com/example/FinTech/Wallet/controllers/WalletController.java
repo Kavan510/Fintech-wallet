@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 public class WalletController {
 
     private final WalletService walletService;
-    private final WalletRepository walletRepository;
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
