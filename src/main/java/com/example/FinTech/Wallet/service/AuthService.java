@@ -21,6 +21,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final TokenBlacklistService tokenBlacklistService;
+
 
     public String register(User user) {
 
@@ -55,4 +57,11 @@ public class AuthService {
 
         return Map.of("token", token);
     }
+
+
+    public void logout(String token) {
+
+        tokenBlacklistService.blacklistToken(token);
+    }
+
 }

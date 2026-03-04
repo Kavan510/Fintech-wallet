@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface WalletRepository extends JpaRepository<Wallet, Long> {
-    Optional<Wallet> findById(String userId);
+//    Optional<Wallet> findById(Long userId);
 
     // Add this to your WalletRepository.java
     boolean existsByUserId(Long userId);
