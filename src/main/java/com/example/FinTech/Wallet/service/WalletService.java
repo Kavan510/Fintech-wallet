@@ -10,6 +10,7 @@ import com.example.FinTech.Wallet.repository.TransactionRepository;
 import com.example.FinTech.Wallet.repository.UserRepository;
 import com.example.FinTech.Wallet.repository.WalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -70,6 +71,21 @@ public class WalletService {
 
         senderWallet.setBalance(senderWallet.getBalance().subtract(amount));
         receiver.setBalance(receiver.getBalance().add(amount));
+
+
+        try {
+
+            // Save wallets -> triggers Optimistic Lock check
+            walletRepository.save(senderWallet);
+            walletRepository.save(receiver);
+
+        } catch (OptimisticLockingFailureException e) {
+
+            throw new OptimisticLockingFailureException(
+                    "Concurrent transaction detected. Please retry."
+            );
+        }
+
 
         WalletTransaction txn = new WalletTransaction();
         txn.setFromWalletId(fromId);

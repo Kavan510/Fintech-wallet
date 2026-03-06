@@ -1,6 +1,7 @@
 package com.example.FinTech.Wallet.exception;
 
 import lombok.Data;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -23,5 +24,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleAccess(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", "UNAUTHORIZED", "message", "You do not own this resource"));
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public  ResponseEntity<String> handleOptimisticLock(){
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body("Transaction conflict detected. Please retry.");
     }
 }
