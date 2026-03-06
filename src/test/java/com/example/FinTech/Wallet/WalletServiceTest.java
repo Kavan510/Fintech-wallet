@@ -63,7 +63,7 @@ public class WalletServiceTest {
         walletRepository.save(w2);
 
         // 🔹 Act
-        walletService.transferMoney(
+        walletService.transferMoneyWithRetry(
                 w1.getId(),
                 w2.getId(),
                 new BigDecimal("30.00"),
@@ -113,7 +113,7 @@ public class WalletServiceTest {
         walletRepository.save(w2);
 
         assertThrows(InsufficientFundsException.class, () -> {
-            walletService.transferMoney(
+            walletService.transferMoneyWithRetry(
                     w1.getId(),
                     w2.getId(),
                     new BigDecimal("100.00"),

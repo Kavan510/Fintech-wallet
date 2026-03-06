@@ -30,13 +30,13 @@ public class WalletService {
     @Autowired
     private UserRepository userRepository;
 
-
     @Transactional
-    public WalletTransaction transferMoney(Long fromId,
-                                           Long toId,
-                                           BigDecimal amount,
-                                           String idempotencyKey,String loggedInUser) {
-
+    private WalletTransaction actualTransaction(
+            Long fromId,
+            Long toId,
+            BigDecimal amount,
+            String idempotencyKey,
+            String loggedInUser){
         Wallet senderWallet = walletRepository.findById(fromId)
                 .orElseThrow(() -> new RuntimeException("Wallet not found"));
 
@@ -74,8 +74,6 @@ public class WalletService {
 
 
         try {
-
-            // Save wallets -> triggers Optimistic Lock check
             walletRepository.save(senderWallet);
             walletRepository.save(receiver);
 
@@ -98,6 +96,31 @@ public class WalletService {
         return transactionRepository.save(txn);
     }
 
+    @Transactional
+    public WalletTransaction transferMoneyWithRetry(Long fromId,
+                                                    Long toId,
+                                                    BigDecimal amount,
+                                                    String idempotencyKey, String loggedInUser) {
+
+        int maxRetry = 3;
+
+        for (int attemp = 0; attemp < maxRetry; attemp++) {
+            try {
+                return actualTransaction(fromId, toId, amount, idempotencyKey, loggedInUser);
+            } catch (OptimisticLockingFailureException e) {
+
+                if (attemp == maxRetry-1) {
+                    throw new RuntimeException("Transaction Failed after multiple retries");
+                }
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ignored) {}
+            }
+
+        }
+            throw new RuntimeException("Transfer Failed");
+    }
+
 
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
@@ -113,8 +136,6 @@ public class WalletService {
         wallet.setUserId(user.getId());
         wallet.setBalance(initialBalance);
         wallet.setCurrencyType(CurrencyType.valueOf("USD"));
-//                .orElseThrow(()->new RuntimeException(""))
-
         return walletRepository.save(wallet);
     }
 }

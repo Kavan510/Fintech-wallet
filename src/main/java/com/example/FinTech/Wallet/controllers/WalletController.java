@@ -35,6 +35,6 @@ public class WalletController {
 
         String loggedInUsername = authentication.getName();
 
-        return ResponseEntity.ok(walletService.transferMoney(fromId, toId, amount, key,loggedInUsername));
+        return ResponseEntity.ok(walletService.transferMoneyWithRetry(fromId, toId, amount, key,loggedInUsername));
     }
 }
