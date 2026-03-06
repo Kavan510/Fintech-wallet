@@ -8,10 +8,8 @@ import java.math.BigDecimal;
 
 @Entity
 @Data
-public class Wallet {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Wallet extends BaseEntity{
+
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
