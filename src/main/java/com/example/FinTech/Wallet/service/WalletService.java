@@ -31,7 +31,7 @@ public class WalletService {
     private UserRepository userRepository;
 
     @Transactional
-    private WalletTransaction actualTransaction(
+    public WalletTransaction actualTransaction(
             Long fromId,
             Long toId,
             BigDecimal amount,
@@ -114,7 +114,10 @@ public class WalletService {
                 }
                 try {
                     Thread.sleep(50);
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException er) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Thread interrupted during retry", er);
+                }
             }
 
         }

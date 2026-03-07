@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.Duration;
 import java.util.Date;
 
 @Component
@@ -17,7 +18,7 @@ public class JwtUtil {
             "THIS_IS_A_SECRET_KEY_FOR_JWT_GENERATION_123456".getBytes()
     );
 
-    private final long EXPIRATION_TIME = 1000 * 60 * 60;
+    private static final long EXPIRATION_TIME = Duration.ofHours(1).toMillis();
 
     public  String generateToken(String username, String role) {
 
