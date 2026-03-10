@@ -11,6 +11,9 @@ import com.example.FinTech.Wallet.repository.UserRepository;
 import com.example.FinTech.Wallet.repository.WalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -73,17 +76,8 @@ public class WalletService {
         receiver.setBalance(receiver.getBalance().add(amount));
 
 
-        try {
             walletRepository.save(senderWallet);
             walletRepository.save(receiver);
-
-        } catch (OptimisticLockingFailureException e) {
-
-            throw new OptimisticLockingFailureException(
-                    "Concurrent transaction detected. Please retry."
-            );
-        }
-
 
         WalletTransaction txn = new WalletTransaction();
         txn.setFromWalletId(fromId);
@@ -97,33 +91,32 @@ public class WalletService {
     }
 
     @Transactional
-    public WalletTransaction transferMoneyWithRetry(Long fromId,
-                                                    Long toId,
-                                                    BigDecimal amount,
-                                                    String idempotencyKey, String loggedInUser) {
-
-        int maxRetry = 3;
-
-        for (int attemp = 0; attemp < maxRetry; attemp++) {
-            try {
-                return actualTransaction(fromId, toId, amount, idempotencyKey, loggedInUser);
-            } catch (OptimisticLockingFailureException e) {
-
-                if (attemp == maxRetry-1) {
-                    throw new RuntimeException("Transaction Failed after multiple retries");
-                }
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException er) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("Thread interrupted during retry", er);
-                }
-            }
-
-        }
-            throw new RuntimeException("Transfer Failed");
+    @Retryable(
+            retryFor = OptimisticLockingFailureException.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 50,multiplier = 2)
+    )
+    public WalletTransaction transferMoneyWithRetry(
+            Long fromId,
+            Long toId,
+            BigDecimal amount,
+            String idempotencyKey,
+            String loggedInUser
+    ) {
+        return actualTransaction(fromId, toId, amount, idempotencyKey, loggedInUser);
     }
 
+    @Recover
+    public WalletTransaction recover(
+            OptimisticLockingFailureException e,
+            Long fromId,
+            Long toId,
+            BigDecimal amount,
+            String idempotencyKey,
+            String loggedInUser
+    ) {
+        throw new RuntimeException("Transaction failed after retries", e);
+    }
 
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
