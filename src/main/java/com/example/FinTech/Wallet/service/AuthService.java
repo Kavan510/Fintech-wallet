@@ -19,7 +19,6 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final TokenBlacklistService tokenBlacklistService;
 
@@ -50,7 +49,7 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String token = jwtUtil.generateToken(
+        String token = JwtUtil.generateToken(
                 user.getUsername(),
                 user.getRole().name()
         );

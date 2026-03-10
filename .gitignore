@@ -18,7 +18,7 @@ target/
 *.iws
 *.iml
 *.ipr
-
+*.yml
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -32,7 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 /src/main/resources/application.properties
-/docker-compose.yml
 
 /sonar-project.properties
 

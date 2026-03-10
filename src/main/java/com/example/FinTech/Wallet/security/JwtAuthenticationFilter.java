@@ -24,7 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
 
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
@@ -49,8 +48,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throw new RuntimeException("Token has been logged out");
         }
 
-        String username = jwtUtil.extractUsername(token);
-        String role = jwtUtil.extractRole(token);
+        String username = JwtUtil.extractUsername(token);
+        String role = JwtUtil.extractRole(token);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 

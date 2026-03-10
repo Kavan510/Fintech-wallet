@@ -11,16 +11,16 @@ import java.security.Key;
 import java.time.Duration;
 import java.util.Date;
 
-@Component
-public class JwtUtil {
 
-    private final  Key SECRET_KEY = Keys.hmacShaKeyFor(
+public final class JwtUtil {
+
+    private static final  Key SECRET_KEY = Keys.hmacShaKeyFor(
             "THIS_IS_A_SECRET_KEY_FOR_JWT_GENERATION_123456".getBytes()
     );
 
     private static final long EXPIRATION_TIME = Duration.ofHours(1).toMillis();
 
-    public  String generateToken(String username, String role) {
+    public static String generateToken(String username, String role) {
 
         return Jwts.builder()
                 .setSubject(username)
@@ -31,15 +31,15 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String extractUsername(String token) {
+    public static String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
-    public String extractRole(String token) {
+    public static  String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
 
-    private Claims extractAllClaims(String token) {
+    private static Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
@@ -47,7 +47,7 @@ public class JwtUtil {
                 .getBody();
     }
 
-    public Date extractExpiration(String token) {
+    public static Date extractExpiration(String token) {
         return extractAllClaims(token).getExpiration();
     }
 }
